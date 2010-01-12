@@ -130,6 +130,8 @@ class MY_Router extends CI_Router {
 
 	function _validate_request($segments)
 	{
+	    $this->_mb_module($segments[0]);
+	    
 		// Regular non-modular requests are handled by stock CI code
 		if ($this->_mb_module === FALSE)
 		{

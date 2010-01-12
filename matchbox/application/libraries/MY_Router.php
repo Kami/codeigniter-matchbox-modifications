@@ -50,6 +50,7 @@ class MY_Router extends CI_Router {
 
 		// Load configuration file and merge with default data
 		$file = APPPATH.'config/matchbox'.EXT;
+		
 		if (file_exists($file))
 		{
 			include($file);
@@ -155,20 +156,27 @@ class MY_Router extends CI_Router {
 		$directory = $this->_mb_module.'controllers/';
 
 		// Does the controller exist in module controller root?
-		if (file_exists($directory.$segments[0].EXT))
+		if (count($segments) > 1 && file_exists($directory.$segments[1].EXT))
+		{
+			return array_slice($segments, 1);
+		}
+		
+	    // Does the controller with the same name as module exist?
+	    if (file_exists($directory.$segments[0].EXT))
 		{
 			return $segments;
 		}
 
 		// At this point, the controller can only be in a sub-directory
-		if ( ! is_dir($directory.$segments[0]))
+		if ( ! is_dir($directory.$segments[1]))
 		{
 			show_404($directory.$segments[0]);
 		}
 
-		$this->set_directory($this->fetch_directory().$segments[0]);
-		$directory .= $segments[0].'/';
+		$this->set_directory($this->fetch_directory().$segments[1]);
+		$directory .= $segments[1].'/';
 		$segments  = array_slice($segments, 1);
+
 
 		if (count($segments) > 0)
 		{
@@ -206,7 +214,6 @@ class MY_Router extends CI_Router {
 			{
 				$this->set_method(trim($this->uri->_filter_uri($_GET[$this->config->item('function_trigger')])));
 			}
-
 			return;
 		}
 
@@ -231,7 +238,6 @@ class MY_Router extends CI_Router {
 			}
 
 			// {{{ Matchbox
-
 			if (strpos($this->default_controller, '/') !== FALSE)
 			{
 				$x = explode('/', $this->default_controller);
@@ -259,7 +265,6 @@ class MY_Router extends CI_Router {
 				$this->set_method('index');
 				$this->_set_request($x);
 			}
-
 			// }}}
 
 			// re-index the routed segments array so it starts with 1 rather than 0
@@ -277,9 +282,10 @@ class MY_Router extends CI_Router {
 		$this->uri->_explode_segments();
 
 		// {{{ Matchbox
-
+		
 		$segments = $this->uri->segments;
 		$module   = $segments[0].'/';
+		$this->_mb_module($segments[0]);
 
 		if ($this->_mb_module($segments[0]))
 		{
@@ -287,7 +293,6 @@ class MY_Router extends CI_Router {
 
 			if (count($segments) < 2)
 			{
-
 				if ($this->_mb_default_controller === FALSE)
 				{
 					if ($this->_mb_strict === TRUE)
